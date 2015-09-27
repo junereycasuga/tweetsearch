@@ -1,0 +1,19 @@
+{
+  "name": "tweetsearch",
+  "version": "0.0.0",
+  "homepage": "https://github.com/junereycasuga/tweetsearch",
+  "description": "An app for searching location based tweets",
+  "main": "",
+  "moduleType": [],
+  "authors": [
+    "Junerey Casuga"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
