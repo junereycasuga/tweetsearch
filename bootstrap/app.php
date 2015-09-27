@@ -43,8 +43,6 @@ $app->singleton(
 
 $app->register('Jenssegers\Mongodb\MongodbServiceProvider');
 
-$app->withEloquent();
-
 /*
 |--------------------------------------------------------------------------
 | Return The Application
