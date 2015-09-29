@@ -51,7 +51,21 @@
                 place = autocomplete.getPlace();
                 geometry['lat'] = place.geometry.location.H;
                 geometry['long'] = place.geometry.location.L;
-                console.log(geometry);
+
+                if(place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(20);
+                }
+
+                marker.setIcon(/** @type {google.maps.Icon} */({
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(35, 35)
+                }));
             });
         }
     </script>
