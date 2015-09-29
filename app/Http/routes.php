@@ -15,9 +15,4 @@ Route::get('/', function () {
     return view('app');
 });
 
-Route::get('search', function() {
-	return Twitter::getSearch([
-		'q'			=>	'place:Quezon City',
-		'format'	=>	'json'
-		]);
-});
+Route::get('search', 'AppController@search');
