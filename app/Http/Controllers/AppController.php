@@ -7,6 +7,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Thujohn\Twitter\Facades\Twitter;
 
+use App\SearchHistory;
+
 class AppController extends Controller
 {
 
@@ -40,14 +42,14 @@ class AppController extends Controller
      * @param varchar   long
      * @return json
      */
-    private function getTweets($lat, $long)
+    public function getTweets($lat, $long)
     {
         $data = [];
 
-        $geo = $this->getGeoID('14.6839606', '121.0622039');
+        $geo = json_decode($this->getGeoID($lat, $long));
 
         $search_status = Twitter::getSearch([
-            'q'         =>  'place:'.$geo['id'],
+            'q'         =>  'place:'.$geo->id,
             'format'    =>  'array'
             ]);
 
@@ -65,18 +67,26 @@ class AppController extends Controller
             array_push($data, $arr);
         }
 
-        return $data;
+        SearchHistory::create([
+            'place_id' => $geo->id,
+            'place_name' => $geo->name,
+            'lat' => $lat,
+            'long' => $long,
+            'tweets' => $data
+            ]);
+
+        return json_encode($data);
     }
 
     /**
      * Search tweets and save to database for caching
      *
      */
-    public function search($lat, $long)
+    public function search(Request $request)
     {
-        $tweets = $this->getTweets($lat, $long);
+        $tweets = json_decode($this->getTweets($request->lat, $request->long));
 
-        return $tweets;
+        return \Response::json($tweets);
     }
 
 }

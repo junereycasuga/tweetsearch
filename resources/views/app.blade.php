@@ -10,6 +10,7 @@
                 <div id="map" style="width: 100%; height: 600px;"></div>
             </div>
             <div class="row">
+                <input type="hidden" id="_token" name="_token" value="{{ csrf_token() }}">
                 <input type="text" id="city-input" placeholder="Enter a City">
             </div>
         </div>
@@ -26,12 +27,27 @@
             marker,
             place,
             geometry = [];
+            token = $("#_token").val();
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: -33.8688, lng: 151.2195},
                 zoom: 13
               });
+
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    map.setCenter(pos);
+                }, function() {
+                    handleLocationError(true, infoWindow, map.getCenter());
+                });
+            } else {
+                handleLocationError(false, infoWindow, map.getCenter());
+            }
 
             input = (document.getElementById('city-input'));
 
@@ -59,6 +75,9 @@
                     map.setZoom(20);
                 }
 
+                var search_results = searchTweets(geometry['lat'], geometry['long']);
+                console.log(search_results);
+
                 marker.setIcon(/** @type {google.maps.Icon} */({
                     url: place.icon,
                     size: new google.maps.Size(71, 71),
@@ -67,6 +86,29 @@
                     scaledSize: new google.maps.Size(35, 35)
                 }));
             });
+        }
+
+        function searchTweets(lat, long) {
+            $.ajax({
+                url: 'search',
+                method: 'POST',
+                data: {
+                    lat: lat,
+                    long: long,
+                    _token: token
+                }
+            })
+            .done(function(data) {
+                console.log(data);
+                return data;
+            });
+        }
+
+        function handleLocationError(browseHasGeoLocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browseHasGeoLocation ? 
+                        'Error: The Geolocation service failed.' :
+                        'Error: Your browser doesn\'t support geolocation.');
         }
     </script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyVoe53P44XZmO5uR3wwBBqbJssstTq1E&libraries=places&callback=initMap" async defer></script>
