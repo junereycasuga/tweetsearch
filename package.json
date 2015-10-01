@@ -7,5 +7,10 @@
     "laravel-elixir": "^3.0.0",
     "bootstrap-sass": "^3.0.0",
     "bower": "latest"
+  },
+  "scripts": {
+  	"postinstall": {
+  		"bower install"
+  	}
   }
 }
