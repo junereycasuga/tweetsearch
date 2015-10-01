@@ -11,8 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('app');
-});
+Route::get('/', 'AppController@index');
+Route::get('history', 'AppController@history');
 
 Route::post('search', 'AppController@search');

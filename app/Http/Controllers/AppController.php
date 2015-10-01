@@ -12,81 +12,97 @@ use App\SearchHistory;
 class AppController extends Controller
 {
 
-    /**
-     * Search Geolocation data
-     *
-     * @param varchar lat
-     * @param varchar long
-     * @return json
-     */
-    private function getGeoID($lat, $long)
+    public function __construct()
     {
-        $result = [];
-        $geo = Twitter::getGeoSearch([
-            'lat'           =>  $lat,
-            'long'          =>  $long,
-            'granularity'   =>  'city',
-            'format'        =>  'array'
-            ]);
-
-        $result['id'] = $geo['result']['places'][0]['id'];
-        $result['name'] = $geo['result']['places'][0]['name'];
-
-        return json_encode($result);
+        if(!isset($_COOKIE['id'])) {
+            setcookie('id', rand().time(), time() + 60*60);
+        }
     }
 
     /**
      * Search tweets by place.
      *
-     * @param varchar   lat
-     * @param varchar   long
+     * @param varchar   city
+     * @param number    lat
+     * @param number    lng
      * @return json
      */
-    public function getTweets($lat, $long)
+    public function getTweets($city, $lat, $lng)
     {
+        $city = strtoupper($city);
         $data = [];
 
-        $geo = json_decode($this->getGeoID($lat, $long));
+        $tweets = SearchHistory::where('cookie_id', '=', $_COOKIE['id'])->where('search_term', '=', $city)->get();
 
-        $search_status = Twitter::getSearch([
-            'q'         =>  'place:'.$geo->id,
-            'format'    =>  'array'
-            ]);
+        if(count($tweets) == 0) {
+            $search_status = Twitter::getSearch([
+                'q'         =>  $city,
+                'geocode'   =>  $lat.",".$lng.",5km",
+                'format'    =>  'array'
+                ]);
 
-        foreach($search_status['statuses'] as $status) {
-            $arr = [];
+            foreach($search_status['statuses'] as $status) {
+                $arr = [];
 
-            $arr['id'] = $status['id'];
-            $arr['text'] = $status['text'];
-            $arr['user']['id'] = $status['user']['id'];
-            $arr['user']['name'] = $status['user']['name'];
-            $arr['user']['screen_name'] = $status['user']['screen_name'];
-            $arr['user']['image'] = $status['user']['profile_image_url_https'];
-            $arr['coordinates'] = $status['coordinates']['coordinates'];
+                $arr['cookie_id'] = $_COOKIE['id'];
+                $arr['id'] = $status['id'];
+                $arr['text'] = $status['text'];
+                $arr['tweeted_at'] = $status['created_at'];
+                $arr['user']['id'] = $status['user']['id'];
+                $arr['user']['name'] = $status['user']['name'];
+                $arr['user']['screen_name'] = $status['user']['screen_name'];
+                $arr['user']['image'] = $status['user']['profile_image_url_https'];
+                $arr['coordinates']['lat'] = $status['coordinates']['coordinates'][0];
+                $arr['coordinates']['lng'] = $status['coordinates']['coordinates'][1];
 
-            array_push($data, $arr);
+                if($arr['coordinates']['lng'] != null && $arr['coordinates']['lng'] != null) {
+                    array_push($data, $arr);
+                }
+            }
+
+            SearchHistory::create([
+                'cookie_id' => $_COOKIE['id'],
+                'search_term' => $city,
+                'lat' => $lat,
+                'lng' => $lng,
+                'tweets' => $data
+                ]);
+        } else {
+            $data = $tweets[0]->tweets;
         }
-
-        SearchHistory::create([
-            'place_id' => $geo->id,
-            'place_name' => $geo->name,
-            'lat' => $lat,
-            'long' => $long,
-            'tweets' => $data
-            ]);
 
         return json_encode($data);
     }
 
     /**
+     * Shows home page
+     * 
+     */
+    public function index()
+    {
+        return view('app/search');
+    }
+
+    /**
+     * Shows search history page
+     * 
+     */
+    public function history()
+    {
+        $history = SearchHistory::where('cookie_id','=',$_COOKIE['id'])->get();
+
+        return view('app/history', ['history' => $history]);
+    }
+
+    /**
      * Search tweets and save to database for caching
-     *
+     * 
+     * @param Request   $request
      */
     public function search(Request $request)
     {
-        $tweets = json_decode($this->getTweets($request->lat, $request->long));
+        $tweets = json_decode($this->getTweets($request->city, $request->lat, $request->lng));
 
         return \Response::json($tweets);
     }
-
 }
