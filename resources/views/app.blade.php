@@ -3,17 +3,7 @@
     <head>
         <title>Tweet Search</title>
         <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
-        <style>
-            body, html {
-                height: 100%;
-                width: 100%;
-            }
-
-            #map-container {
-                width: 100%;
-                height: 100%;
-            }
-        </style>
+        <link rel="stylesheet" href="/css/app.css">
     </head>
     <body>
         @yield('content')
