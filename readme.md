@@ -10,3 +10,5 @@ Tweet Search is built with Laravel PHP Framework with the use of Google Maps API
 3. Generate an application key by running `php artisan key:generate`
 4. Supply the right Twitter API and Database Credentials on `.env` file
 4. Run `php artisan serve`
+
+Enjoy!
