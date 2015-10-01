@@ -12,19 +12,38 @@ function initMap() {
         zoom: 13
       });
 
-    if(navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var pos = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
+    if($('#city-input').val()) {
+        place = $('#city-input').val();
 
-            map.setCenter(pos);
-        }, function() {
-            handleLocationError(true, infoWindow, map.getCenter());
-        });
-    } else {
-        handleLocationError(false, infoWindow, map.getCenter());
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({'address':place}, function(results, status) {
+            if(status == google.maps.GeocoderStatus.OK) {
+                geometry['lat'] = results[0].geometry.location.lat();
+                geometry['lng'] = results[0].geometry.location.lng();
+
+                map.setCenter(results[0].geometry.location);
+                map.setZoom(12);
+
+                searchTweets(place, geometry['lat'], geometry['lng'], map);
+            } else {
+                alert("Can't look for results.");
+            }
+        });   
+    }  else {
+        if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+
+                map.setCenter(pos);
+            }, function() {
+                handleLocationError(true, infoWindow, map.getCenter());
+            });
+        } else {
+            handleLocationError(false, infoWindow, map.getCenter());
+        }
     }
 
     $('#searchBtn').on('click', function() {

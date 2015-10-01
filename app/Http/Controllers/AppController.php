@@ -80,7 +80,13 @@ class AppController extends Controller
      */
     public function index()
     {
-        return view('app/search');
+        if(isset($_GET['q'])) {
+            $query = $_GET['q'];
+        } else {
+            $query = '';
+        }
+        
+        return view('app/search', ['q' => $query]);
     }
 
     /**
