@@ -1,8 +1,8 @@
 @extends('app')
 
 <div class="container-fluid">
-    <div class="row">
-        <div id="map" style="width: 100%; height: 600px;"></div>
+    <div class="row map-container">
+        <div id="map" style="width: 100%; height: 95%"></div>
     </div>
     <div class="row">
         <input type="hidden" id="_token" name="_token" value="{{ csrf_token() }}">
