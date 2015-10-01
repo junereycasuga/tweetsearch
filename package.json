@@ -9,8 +9,6 @@
     "bower": "latest"
   },
   "scripts": {
-  	"postinstall": {
-  		"bower install"
-  	}
+  	"postinstall": "bower install"
   }
 }
