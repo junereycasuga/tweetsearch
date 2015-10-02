@@ -37,7 +37,7 @@ class AppController extends Controller
         if(count($tweets) == 0) {
             $search_status = Twitter::getSearch([
                 'q'         =>  $city,
-                'geocode'   =>  $lat.",".$lng.",5km",
+                'geocode'   =>  $lat.",".$lng.",50km",
                 'format'    =>  'array'
                 ]);
 
